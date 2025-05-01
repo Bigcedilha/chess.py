@@ -194,24 +194,51 @@ def pawn_move(square_state1, piece, first_click, second_click):
 
     target_piece = board_state[r2][c2]
 
+    # Normal one-step forward
     if c1 == c2 and r2 == r1 + direction and target_piece is None:
         board_state[r1][c1] = None
         board_state[r2][c2] = piece
+        if r2 == 0 or r2 == 7:
+            promotion_selecter(r2, c2, square_state1[0])
         return True
 
+    # Two-step forward from start
     if c1 == c2 and r1 == start_row and r2 == r1 + 2 * direction:
         if board_state[r1 + direction][c1] is None and board_state[r2][c2] is None:
             board_state[r1][c1] = None
             board_state[r2][c2] = piece
             return True
 
+    # Diagonal capture
     if abs(c2 - c1) == 1 and r2 == r1 + direction and target_piece is not None:
         if square_state1[0] != target_piece.split('_')[0]:
             board_state[r1][c1] = None
             board_state[r2][c2] = piece
+            if r2 == 0 or r2 == 7:
+                promotion_selecter(r2, c2, square_state1[0])
             return True
 
     return False
+
+def promotion_selecter(r, c, color):
+    promo_window = tk.Toplevel(root)
+    promo_window.title("Promote Pawn")
+    options = ['queen', 'rook', 'bishop', 'knight']
+
+    promo_choice = tk.StringVar()
+    promo_choice.set(options[0])
+    piece_menu = tk.OptionMenu(promo_window, promo_choice, *options)
+    piece_menu.pack()
+
+    def promote_pawn():
+        chosen_piece = promo_choice.get()
+        board_state[r][c] = f"{color}_{chosen_piece}"
+        draw_board()
+        promo_window.destroy()
+
+    confirm_button = tk.Button(promo_window, text="Confirm", command=promote_pawn)
+    confirm_button.pack()
+
 
 def knight_move(square_state1, piece, first_click, second_click):
     r1, c1 = first_click
